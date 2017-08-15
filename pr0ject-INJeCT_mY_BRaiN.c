@@ -3,13 +3,30 @@
 #include <netinet/ip.h>
 #include "ipheader.h"
 #include <string.h>
+#include <netdb.h>
 #include <linux/tcp.h>
 #include "argtable2.h"
-
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 /*define constants*/
 #define packetsize 1500
 
-int help(int arguments,char *argumentz[]){
+int open_payload(int fd,char *buffer,char *file,int size){
+    struct stat st;
+    stat(file,&st);
+    size = st.st_size;
+    fd = open(file,O_RDWR,S_IRUSR,S_IWUSR,S_IROTH,S_IWOTH);
+    if(fd == -1){
+        perror("error loading/reading the payload");
+    }else{
+        read(fd,buffer,size);
+    }
+    return 0;
+}
+
+int helpz(int arguments,char *argumentz[]){
     if(arguments < 2){
         printf("usage:%s [options]\n",(char*)argumentz[0]);
     }
@@ -43,13 +60,17 @@ int main(int argc,char *argv[])
     arg_freetable(argvtable,sizeof(argvtable)/sizeof(argvtable[0]));
     int sock_fd;
     int port = portz->ival[0];
-    printf("%d",port);
     struct sockaddr_in current_socket;
-    struct hostnent *hostid;
+    struct hostent *hostid;
+    hostid = (struct hostent*)host->sval[0];
+    //printf("%s",(char*)hostid);
     sock_fd = socket(AF_INET,SOCK_RAW,IPPROTO_TCP);
     //case if no argument supplied
-    //help(argc,argv);
-    //else any arguments supplied
-    parse(argc,argv);
+    helpz(argc,argv);
+    struct ethhdr *header_eth;
+    header_eth = malloc(sizeof(struct hostent *));
+    strcpy((char*)header_eth->h_dest,(char*)(struct hostent *)hostid);
+    printf("%s",(char*)header_eth);
+    free(header_eth);
     return 0;
 }
