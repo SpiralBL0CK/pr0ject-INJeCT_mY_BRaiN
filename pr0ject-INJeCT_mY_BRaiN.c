@@ -9,9 +9,17 @@
 /*define constants*/
 #define packetsize 1500
 
+int help(int arguments,char *argumentz[]){
+    if(arguments < 2){
+        printf("usage:%s [options]\n",(char*)argumentz[0]);
+    }
+    return 0;
+}
 
-void parse(int argnr,char *argms[]){
-    //define the strucutures 
+
+int main(int argc,char *argv[])
+{
+     //define the strucutures 
     struct arg_int *portz;
     portz = arg_int1(NULL,"port","<n>","PORT TARGET");
     struct arg_str *host;
@@ -25,7 +33,7 @@ void parse(int argnr,char *argms[]){
     struct arg_end *end = arg_end(20); //special type holds the cmdline args error and marks end of array to hold the elements
     void *argvtable[]= {host,portz,help,mac_addr_s,mac_addr_d,end};
     //start parsing
-    int start_parse = arg_parse(argnr,argms,argvtable);
+    int start_parse = arg_parse(argc,argv,argvtable);
     if(help->count == 1){
         arg_print_glossary(stdout,argvtable,NULL);
     }
@@ -33,25 +41,14 @@ void parse(int argnr,char *argms[]){
     //printf("%d\n",portz->ival[0]);
     //free alocated memory
     arg_freetable(argvtable,sizeof(argvtable)/sizeof(argvtable[0]));
-}
-
-int help(int arguments,char *argumentz[]){
-    if(arguments < 2){
-        printf("usage:%s [options]\n",(char*)argumentz[0]);
-    }
-    return 0;
-}
-
-
-int main(int argc,char *argv[])
-{
     int sock_fd;
-    int port;
+    int port = portz->ival[0];
+    printf("%d",port);
     struct sockaddr_in current_socket;
     struct hostnent *hostid;
     sock_fd = socket(AF_INET,SOCK_RAW,IPPROTO_TCP);
     //case if no argument supplied
-    help(argc,argv);
+    //help(argc,argv);
     //else any arguments supplied
     parse(argc,argv);
     return 0;
